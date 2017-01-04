@@ -1,1 +1,1 @@
-# Kirk_Course
+Python exercises - Kirk Course
