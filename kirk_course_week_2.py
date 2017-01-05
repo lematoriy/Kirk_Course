@@ -1,11 +1,10 @@
-
 #!/usr/bin/env python
 
 import re
 
 # ip input - check if at least 3 octets are specified
 while True:
-    ip_address=raw_input("Enter the ip address: ")
+    ip_address=raw_input("\nEnter the ip address: ")
     if len(ip_address.split("."))<3:
         print "Input Error: at least 3 octets should be specified"
     elif len(ip_address.split('.'))>4:
@@ -58,11 +57,10 @@ cisco_ios = "Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version
 software=re.search('Software *\((.*?)\)',cisco_ios).group(1)
 ios=re.search('Version *(.*),',cisco_ios).group(1)
 
-print '\n\n'
 print 'IOS details:'
 print '%25s %25s' % ('Software','Version')
 print '%25s %25s' % (software,ios)
 print '\n\n'
 
 print " END OF OPERATION "
-print '\n\n'
+print '\n\'
