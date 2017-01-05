@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import re
@@ -61,4 +62,7 @@ print '\n\n'
 print 'IOS details:'
 print '%25s %25s' % ('Software','Version')
 print '%25s %25s' % (software,ios)
+print '\n\n'
+
+print " END OF OPERATION "
 print '\n\n'
