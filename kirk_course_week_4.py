@@ -146,7 +146,7 @@ words_of_interest={
                     'uptime':' uptime is '
                     }
 
-show_dict={#-------------------------------------------------------------------------
+show_dict={
             'ios_software':'not found',
             'model':'not found',
             'cpu_id':'not found',
