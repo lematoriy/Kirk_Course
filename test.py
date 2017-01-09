@@ -1,4 +1,4 @@
 import re
-txt='Platform: Cisco 881, Capabilities: Router Switch IGMP'
-rex=re.search('Platform:\s*?(.*?),.*',txt)
+txt='Copyright (c) 1986-2010 by Cisco Systems, Inc.'
+rex=re.search('.* by (.*)',txt)
 print rex.group(1)

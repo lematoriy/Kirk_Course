@@ -8,6 +8,7 @@ R2                    Fas 0/12              123            R S I           881  
 R3                    Fas 0/13              129            R S I           881          Fas 1
 R4                    Fas 0/14              173            R S I           881          Fas 1
 R5                    Fas 0/15              144            R S I           881          Fas 1
+
 SW1> show cdp neighbors detail
 --------------------------
 Device ID: R1
@@ -94,6 +95,7 @@ VTP Management Domain: ''
 Native VLAN: 1
 Duplex: full
 Management address(es):
+
 R1>show cdp neighbors
 Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
                   S - Switch, H - Host, I - IGMP, r - Repeater

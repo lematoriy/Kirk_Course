@@ -53,16 +53,15 @@ cdp_dict={hostname1:{
                     ...
                     }
           }
-look for _hostname>show cdp neighbors + spaces + $
-         _hostname>show cdp neighbors details + spaces + $
 
-if _hostname>show cdp neighbors:
-    - look for "Device ID"
-    - process following lines:
-        re.search((\w+)\s+(.+)\s{2,}).group(1) - neighbor
-        re.search((\w+)\s+(.+)\s{2,}).group(2) - interface
-    - append neighbors[] with neighbor:interface
-    - append cdp_dict[hostname] with neigbors:neighbors[]
+because of the structure:
+for
+    while
+        next
+
+at least one line between commands required
+
+
 '''
 
 
@@ -74,7 +73,8 @@ try:
                 'cdp':'show cdp neighbors',
                 'cdp_detail':'show cdp neighbors detail',
                 'ip':'IP address: ',
-                'model':'Platform:'
+                'model':'Platform:',
+                'vendor':'Copyright (c)'
                 }
 
     rex={
@@ -82,7 +82,8 @@ try:
         'host_in_cdp_detail':'Device ID: (\S+$)',
         'neighbors':'(^\S+)\s{2,}(\S.+?)\s{2,}', #R1                    Fas 0/11              153            R S I           881          Fas 1
         'ip_add':'IP address:\s*(\S*$)',
-        'platform':'Platform:\s*?(.*?),.*'
+        'model':'Platform:\s*?(\S.*?),.*?Capabilities: .*?(\S.*?) IGMP.*',
+        'vendor':'.* by (.*)'
         }
 
     cdp_output={}
@@ -93,7 +94,6 @@ try:
 
     with open(cdp_file) as cdp_input:
         for line in cdp_input:
-            line.strip('\n')
 
             #--- find and process the >show cdp neighobrs block
             if (search_words['cdp'] in line) and (search_words['cdp_detail'] not in line):
@@ -103,7 +103,7 @@ try:
                 cdp_output[hostname]['neighbors']={}
                 #read until line contains 'Device ID'
                 while 'Device ID' not in line:
-                    line=cdp_input.next()
+                    line=cdp_input.next().strip('\n')
                 # skip header
                 line=cdp_input.next().strip('\n')
                 # read following lines unti empty line (strip off \n!) found or line contains '>'symbol
@@ -122,6 +122,9 @@ try:
                         print 'Error message:\n'
                         print e
                         sys.exit()
+
+
+
             #--- find and process the >show cdp neighobrs detail block
             if search_words['cdp_detail'] in line:
                 line=cdp_input.next().strip('\n')
@@ -131,26 +134,31 @@ try:
                         #if device id found process lines below
                         if 'Device ID:' in line:
                             hostname=re.search(rex['host_in_cdp_detail'],line).group(1)
-                            print 'hostname in cdp detail: %s' % (hostname)
+                            #print 'hostname in cdp detail: %s' % (hostname)
+                        # if doesn't exist, create new dictionary for hostname
                         if (hostname not in cdp_output.keys()) and (hostname not in processed):
                             cdp_output[hostname]={}
+                        # process keywords and update dictionary
                         if search_words['ip'] in line:
                             cdp_output[hostname]['ip']=re.search(rex['ip_add'],line).group(1)
-
+                        elif search_words['model'] in line:
+                            cdp_output[hostname]['model']=re.search(rex['model'],line).group(1)
+                            cdp_output[hostname]['dev_type']=re.search(rex['model'],line).group(2)
+                        elif search_words['vendor'] in line:
+                            cdp_output[hostname]['vendor']=re.search(rex['vendor'],line).group(1)
+                        # go to next line
                         line=cdp_input.next().strip('\n')
 
-                    except AttributeError as e:
+                    except AttributeError as e_attr:
                         print 'Error while parsing neighbors in line:\n'
                         print line
                         print 'Error message:\n'
-                        print e
+                        print e_attr
                         sys.exit()
-                    #except StopIteration as e_iter:
-                    #    print 'End of file'
-
-
-
-
+                    # there is a chance .next() would call eof
+                    except StopIteration as e_iter:
+                        break
+                        print 'End of file'
 
 
 except IOError as e:
@@ -158,6 +166,7 @@ except IOError as e:
     print "Error message:\n"
     print e
 
-
+#print 'File opject:\n'
+#print cdp_input
 print 'Results:\n'
 pprint.pprint(cdp_output)
