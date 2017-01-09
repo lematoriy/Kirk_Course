@@ -1,5 +1,4 @@
-y=[1,2,3,4,5,6]
-for x in y:
-    if (x//2)==0:
-        next(y)
-    print x
+import re
+txt='Platform: Cisco 881, Capabilities: Router Switch IGMP'
+rex=re.search('Platform:\s*?(.*?),.*',txt)
+print rex.group(1)

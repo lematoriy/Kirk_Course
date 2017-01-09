@@ -3,6 +3,7 @@
 #import modules
 import re
 import sys
+import pprint
 
 # ======================================================================
 # ***  I - parse cdp
@@ -69,19 +70,24 @@ if _hostname>show cdp neighbors:
 try:
     # opent cdp output file for reading
     cdp_file='/home/ubuntu/PYTHON/Exersise/Kirk_Course/kirk_course_week_5.txt'
-    commands={
+    search_words={
                 'cdp':'show cdp neighbors',
-                'cdp_detail':'show cdp neighbors detail'
-            }
+                'cdp_detail':'show cdp neighbors detail',
+                'ip':'IP address: ',
+                'model':'Platform:'
+                }
 
     rex={
         'host_in_cdp':'(^\w+)>', #SW1>show cdp neighbors
-        'host_in_cdp_detail':'Device ID: (\S+$)'
-        'neighbors':'(^\S+)\s{2,}(\S.+?)\s{2,}' #R1                    Fas 0/11              153            R S I           881          Fas 1
+        'host_in_cdp_detail':'Device ID: (\S+$)',
+        'neighbors':'(^\S+)\s{2,}(\S.+?)\s{2,}', #R1                    Fas 0/11              153            R S I           881          Fas 1
+        'ip_add':'IP address:\s*(\S*$)',
+        'platform':'Platform:\s*?(.*?),.*'
         }
 
     cdp_output={}
 
+    # store process nodes in cdp detail output
     processed=[]
 
 
@@ -90,7 +96,7 @@ try:
             line.strip('\n')
 
             #--- find and process the >show cdp neighobrs block
-            if (commands['cdp'] in line) and (commands['cdp_detail'] not in line):
+            if (search_words['cdp'] in line) and (search_words['cdp_detail'] not in line):
                 hostname=re.search(rex['host_in_cdp'],line).group(1)
                 if hostname not in cdp_output.keys():
                     cdp_output[hostname]={}
@@ -116,21 +122,34 @@ try:
                         print 'Error message:\n'
                         print e
                         sys.exit()
-            #--- find and process the >show cdp neighobrs block
-            if commands['cdp_detail'] in line:
+            #--- find and process the >show cdp neighobrs detail block
+            if search_words['cdp_detail'] in line:
+                line=cdp_input.next().strip('\n')
                 # process lines below until line with '>' is found or empty line
                 while ('>' not in line) and (line!=''):
                     try:
                         #if device id found process lines below
-                        if 'Device ID' in line:
-                            hostname=re.search(rex['host_in_cdp'],line).group(1)
-                            if hostname not in cdp_output.keys() and not in processed:
-                                cdp_output[hostname]={}
-
-
-
+                        if 'Device ID:' in line:
+                            hostname=re.search(rex['host_in_cdp_detail'],line).group(1)
+                            print 'hostname in cdp detail: %s' % (hostname)
+                        if (hostname not in cdp_output.keys()) and (hostname not in processed):
+                            cdp_output[hostname]={}
+                        if search_words['ip'] in line:
+                            cdp_output[hostname]['ip']=re.search(rex['ip_add'],line).group(1)
 
                         line=cdp_input.next().strip('\n')
+
+                    except AttributeError as e:
+                        print 'Error while parsing neighbors in line:\n'
+                        print line
+                        print 'Error message:\n'
+                        print e
+                        sys.exit()
+                    #except StopIteration as e_iter:
+                    #    print 'End of file'
+
+
+
 
 
 
@@ -141,4 +160,4 @@ except IOError as e:
 
 
 print 'Results:\n'
-print cdp_output
+pprint.pprint(cdp_output)
