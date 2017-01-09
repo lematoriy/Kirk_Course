@@ -1,8 +1,5 @@
-import re
-uptime1 = 'twb-sf-881 uptime is 6 weeks, 4 days, 2 hours, 25 minutes'
-lookfor='week'
-rex=r'.*?(\d*) '+ re.escape(lookfor) + r'.*'
-print 'rex= ' + rex
-x=re.search(rex,uptime1)
-print x.group(0)
-print x.group(1)
+y=[1,2,3,4,5,6]
+for x in y:
+    if (x//2)==0:
+        next(y)
+    print x

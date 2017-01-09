@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 #import modules
-
+import re
+import sys
 
 # ======================================================================
 # ***  I - parse cdp
@@ -51,107 +52,93 @@ cdp_dict={hostname1:{
                     ...
                     }
           }
+look for _hostname>show cdp neighbors + spaces + $
+         _hostname>show cdp neighbors details + spaces + $
 
-
+if _hostname>show cdp neighbors:
+    - look for "Device ID"
+    - process following lines:
+        re.search((\w+)\s+(.+)\s{2,}).group(1) - neighbor
+        re.search((\w+)\s+(.+)\s{2,}).group(2) - interface
+    - append neighbors[] with neighbor:interface
+    - append cdp_dict[hostname] with neigbors:neighbors[]
 '''
 
-sw1_show_cdp_neighbors = '''
-SW1>show cdp neighbors
-Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
-                                 S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone
-Device ID            Local Intrfce        Holdtme        Capability        Platform    Port ID
-R1                    Fas 0/11              153            R S I           881          Fas 1
-R2                    Fas 0/12              123            R S I           881          Fas 1
-R3                    Fas 0/13              129            R S I           881          Fas 1
-R4                    Fas 0/14              173            R S I           881          Fas 1
-R5                    Fas 0/15              144            R S I           881          Fas 1
-'''
 
-sw1_show_cdp_neighbors_detail = '''
-SW1> show cdp neighbors detail
---------------------------
-Device ID: R1
-Entry address(es):
-   IP address: 10.1.1.1
-Platform: Cisco 881, Capabilities: Router Switch IGMP
-Interface: FastEthernet0/11, Port ID (outgoing port): FastEthernet1
-Holdtime: 153 sec
-Version :
-Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version 15.0(1)M4, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Fri 29-Oct-10 00:02 by prod_rel_team
-advertisement version: 2
-VTP Management Domain: ''
-Native VLAN: 1
-Duplex: full
-Management address(es):
---------------------------
-Device ID: R2
-Entry address(es):
-   IP address: 10.1.1.2
-Platform: Cisco 881, Capabilities: Router Switch IGMP
-Interface: FastEthernet0/12, Port ID (outgoing port): FastEthernet1
-Holdtime: 123 sec
-Version :
-Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version 15.0(1)M4, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Fri 29-Oct-10 00:02 by prod_rel_team
-advertisement version: 2
-VTP Management Domain: ''
-Native VLAN: 1
-Duplex: full
-Management address(es):
---------------------------
-Device ID: R3
-Entry address(es):
-   IP address: 10.1.1.3
-Platform: Cisco 881, Capabilities: Router Switch IGMP
-Interface: FastEthernet0/13, Port ID (outgoing port): FastEthernet1
-Holdtime: 129 sec
-Version :
-Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version 15.0(1)M4, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Fri 29-Oct-10 00:02 by prod_rel_team
-advertisement version: 2
-VTP Management Domain: ''
-Native VLAN: 1
-Duplex: full
-Management address(es):
---------------------------
-Device ID: R4
-Entry address(es):
-   IP address: 10.1.1.4
-Platform: Cisco 881, Capabilities: Router Switch IGMP
-Interface: FastEthernet0/14, Port ID (outgoing port): FastEthernet1
-Holdtime: 173 sec
-Version :
-Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version 15.0(1)M4, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Fri 29-Oct-10 00:02 by prod_rel_team
-advertisement version: 2
-VTP Management Domain: ''
-Native VLAN: 1
-Duplex: full
-Management address(es):
---------------------------
-Device ID: R5
-Entry address(es):
-   IP address: 10.1.1.5
-Platform: Cisco 881, Capabilities: Router Switch IGMP
-Interface: FastEthernet0/15, Port ID (outgoing port): FastEthernet1
-Holdtime: 144 sec
-Version :
-Cisco IOS Software, C880 Software (C880DATA-UNIVERSALK9-M), Version 15.0(1)M4, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2010 by Cisco Systems, Inc.
-Compiled Fri 29-Oct-10 00:02 by prod_rel_team
-advertisement version: 2
-VTP Management Domain: ''
-Native VLAN: 1
-Duplex: full
-Management address(es):
-'''
+
+try:
+    # opent cdp output file for reading
+    cdp_file='/home/ubuntu/PYTHON/Exersise/Kirk_Course/kirk_course_week_5.txt'
+    commands={
+                'cdp':'show cdp neighbors',
+                'cdp_detail':'show cdp neighbors detail'
+            }
+
+    rex={
+        'host_in_cdp':'(^\w+)>', #SW1>show cdp neighbors
+        'host_in_cdp_detail':'Device ID: (\S+$)'
+        'neighbors':'(^\S+)\s{2,}(\S.+?)\s{2,}' #R1                    Fas 0/11              153            R S I           881          Fas 1
+        }
+
+    cdp_output={}
+
+    processed=[]
+
+
+    with open(cdp_file) as cdp_input:
+        for line in cdp_input:
+            line.strip('\n')
+
+            #--- find and process the >show cdp neighobrs block
+            if (commands['cdp'] in line) and (commands['cdp_detail'] not in line):
+                hostname=re.search(rex['host_in_cdp'],line).group(1)
+                if hostname not in cdp_output.keys():
+                    cdp_output[hostname]={}
+                cdp_output[hostname]['neighbors']={}
+                #read until line contains 'Device ID'
+                while 'Device ID' not in line:
+                    line=cdp_input.next()
+                # skip header
+                line=cdp_input.next().strip('\n')
+                # read following lines unti empty line (strip off \n!) found or line contains '>'symbol
+                while ('>' not in line) and (line!=''):
+                    try:
+                        neighbor=''
+                        interfaces=''
+                        neighbor=re.search(rex['neighbors'],line).group(1)
+                        interface=re.search(rex['neighbors'],line).group(2)
+                        cdp_output[hostname]['neighbors'][neighbor]=interface
+                        #print 'neighbor: %s, interface: %s' % (neighbor,interface)
+                        line=cdp_input.next().strip('\n')
+                    except AttributeError as e:
+                        print 'Error while parsing neighbors in line:\n'
+                        print line
+                        print 'Error message:\n'
+                        print e
+                        sys.exit()
+            #--- find and process the >show cdp neighobrs block
+            if commands['cdp_detail'] in line:
+                # process lines below until line with '>' is found or empty line
+                while ('>' not in line) and (line!=''):
+                    try:
+                        #if device id found process lines below
+                        if 'Device ID' in line:
+                            hostname=re.search(rex['host_in_cdp'],line).group(1)
+                            if hostname not in cdp_output.keys() and not in processed:
+                                cdp_output[hostname]={}
+
+
+
+
+                        line=cdp_input.next().strip('\n')
+
+
+
+except IOError as e:
+    print "Error while opening cdp output file. Make sure the file exists\n"
+    print "Error message:\n"
+    print e
+
+
+print 'Results:\n'
+print cdp_output

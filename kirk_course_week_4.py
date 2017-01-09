@@ -12,9 +12,6 @@ Re-using some of the code from class3, exercise4--determine if the IP address is
 Continue prompting the user to re-input an IP address until a valid IP address is input.
 '''
 #------------------------------------------------------------------------
-print '\n'
-print '='*10 + '  PART I  ' + '='*10
-
 entries=0
 while True:
     #safety trigger - exit after 5 attempts
@@ -69,7 +66,7 @@ while True:
     if check=='not_valid':
         continue
     else:
-        print "\nIp check status: %s valid\n" % ('.'.join(ip_add))
+        print "\nIp check status: valid\n"
         break
 
 
@@ -133,7 +130,7 @@ Configuration register is 0x2102
 >>>>> end <<<<<
 '''
 # build list of words to look for and target dictionary to store found values
-# split the input by linesre.search(' *(\S*$)',line)
+# split the input by lines
 # process each line
 # if line contains word of interest process it further at the same time capture keyword
 # split line by whitespaces
@@ -141,110 +138,23 @@ Configuration register is 0x2102
 
 words_of_interest={
                     'ios_software':'Cisco IOS Software',
-                    'model':'bytes of memory',
+                    'memory_used':'bytes of memory',
                     'cpu_id':'Processor board ID',
                     'uptime':' uptime is '
                     }
-
+'''
 show_dict={
             'ios_software':'not found',
-            'model':'not found',
+            'memory_used':'not found',
             'cpu_id':'not found',
             'uptime':'not found'
             }
+'''
+show_dict={}
 
-# show_dict={}
-
-show_output=show_version.strip('\n').splitlines()
+show_output=show_version.stip('\n').splitlines()
 
 for line in show_output:
-    for key,value in words_of_interest.iteritems():
+    for key,value in words_of_interest:
         if value in line:
-            if key=='ios_software':
-                show_dict[key]=re.search('.*?\((.*?)\)',line).group(1)
-            elif key=='model':
-                show_dict[key]=re.search('^(.*?) processor',line).group(1)
-            elif key=='cpu_id':
-                show_dict[key]=re.search(' *(\S*$)',line).group(1)
-            elif key=='uptime':
-                show_dict[key]=re.search('uptime is (.*$)',line).group(1)
-            else:
-                print 'Something is wrong'
-
-print '\n'
-print '='*10 + '  PART II  ' + '='*10+ '\n'
-for key,value in show_dict.iteritems():
-    print '%20s | %s' % (key,value)
-
-
-
-# ======================================================================
-# ***  III - uptime converter
-# task:
-'''
-III. Create a program that converts the following uptime strings to a time in seconds.
-
-uptime1 = 'twb-sf-881 uptime is 6 weeks, 4 days, 2 hours, 25 minutes'
-uptime2 = '3750RJ uptime is 1 hour, 29 minutes'
-uptime3 = 'CATS3560 uptime is 8 weeks, 4 days, 18 hours, 16 minutes'
-uptime4 = 'rtr1 uptime is 5 years, 18 weeks, 8 hours, 23 minutes'
-
-For each of these strings store the uptime in a dictionary using the device name as the key.
-
-During this conversion process, you will have to convert strings to integers.  For these string
-to integer conversions use try/except to catch any string to integer conversion exceptions.
-
-For example:
-int('5') works fine
-int('5 years') generates a ValueError exception.
-
-Print the dictionary to standard output.
-'''
-#-------------------------------------------------------------------------
-
-uptime1 = 'twb-sf-881 uptime is 6 weeks, 4 days, 2 hours, 25 minutes'
-uptime2 = '3750RJ uptime is 1 hour, 29 minutes'
-uptime3 = 'CATS3560 uptime is 8 weeks, 4 days, 18 hours, 16 minutes'
-uptime4 = 'rtr1 uptime is 5 years, 18 weeks, 8 hours, 23 minutes'
-
-uptime=(uptime1,uptime2,uptime3,uptime4)
-
-uptime_dict={
-            'year':0,
-            'week':0,
-            'day':0,
-            'hour':0,
-            'minute':0,
-            'second':0
-            }
-
-uptime_seconds={}
-
-try:
-    for timeline in uptime:
-        for key,value in uptime_dict.iteritems():
-            uptime_dict[key]=0
-            if key in timeline:
-                rex=r'.*?(\d*) '+ re.escape(key) + r'.*'
-                uptime_dict[key]=int(re.search(rex,timeline).group(1))
-
-        time_in_seconds=uptime_dict['year']*365*24*60*60 + \
-                        uptime_dict['week']*7*24*60*60 + \
-                        uptime_dict['day']*24*60*60 + \
-                        uptime_dict['hour']*60*60 + \
-                        uptime_dict['minute']*60 + \
-                        uptime_dict['second']
-
-        uptime_seconds[timeline]=time_in_seconds
-
-except ValueError as e:
-    print 'Conversion to integer incurred error. Error message:\n'
-    print e
-    sys.exit()
-
-print '\n'
-print '='*10 + '  PART III  ' + '='*10 + '\n'
-print '%20s | %s' % ('TIME IN SECONDS','RAW UPTIME STRING')
-for key,value in uptime_seconds.iteritems():
-    print '%20s | %s' % (value,key)
-print '\n'
+            if key='ios_software':
