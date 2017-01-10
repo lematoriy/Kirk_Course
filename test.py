@@ -17,7 +17,12 @@ def bar(x):
 bar(1)
 print x
 '''
+'''
 a='r1'
 b='r2'
 edge=(a,b)
 print edge
+'''
+ip='10,1,1,1'
+ip=ip.split('.')
+print ip
