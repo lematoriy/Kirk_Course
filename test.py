@@ -23,6 +23,7 @@ b='r2'
 edge=(a,b)
 print edge
 '''
-ip='10,1,1,1'
-ip=ip.split('.')
-print ip
+list4=('a','b','c')
+dict4=dict(enumerate(list4))
+
+print dict4

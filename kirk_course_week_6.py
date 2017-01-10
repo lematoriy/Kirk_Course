@@ -18,7 +18,7 @@ _list=(1,2,3,4)
 newdict=list2dict(_list)
 print newdict
 
-# with def and zip
+# with dict and zip
 def list2dict2(inlist):
     outdict=dict(zip(range(len(inlist)),inlist))
     return outdict
@@ -27,6 +27,20 @@ inlist=('one','two','three','four')
 newoutdict=list2dict2(inlist)
 print newoutdict
 
+
+#with enumerate
+list3=('a','b','c')
+dict3={}
+for n,item in enumerate(list3):
+    dict3[n]=item
+
+print dict3
+
+# with dict and enumerate
+list4=('a','b','c')
+dict4=dict(enumerate(list4))
+
+print dict4
 
 '''
 3a.Convert the IP address validation code (Class4, exercise1) into a function,
