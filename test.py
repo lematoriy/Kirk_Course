@@ -23,7 +23,18 @@ b='r2'
 edge=(a,b)
 print edge
 '''
-list4=('a','b','c')
-dict4=dict(enumerate(list4))
-
-print dict4
+import re
+line='GigabitEthernet0/1 is up, line protocol is up'
+interfacenames=[
+                'Loopback',
+                'Ethernet',
+                'FastEthernet',
+                'GigabitEthernet',
+                'Serial'
+                ]
+#"r'((" + '|'.join(interfacenames) + ')\S+) is (up|down)' + "'"
+#r'(' + '|'.join(interfacenames) + '\S+?) '
+rex=r'((' + r'|'.join(interfacenames) + r')\S+) is (up|down)'
+print rex
+interface=re.match(rex,line)
+print interface.group(1)
