@@ -102,12 +102,12 @@ class Uptime(object):
         else:
             self.n_seconds=0
 
-        print 'years: %d' % self.years()
-        print 'weeks: %d' % self.weeks()
-        print 'days: %d' % self.days()
-        print 'hours: %d' % self.hours()
-        print 'minutes: %d' % self.minutes()
-        print 'seconds: %d' % self.n_seconds
+        #print 'years: %d' % self.years()
+        #print 'weeks: %d' % self.weeks()
+        #print 'days: %d' % self.days()
+        #print 'hours: %d' % self.hours()
+        #print 'minutes: %d' % self.minutes()
+        #print 'seconds: %d' % self.n_seconds
 
 
         self.uptime_seconds=int(self.n_seconds+ \
@@ -119,7 +119,7 @@ class Uptime(object):
         print 'total uptime in seconds: %d' % self.uptime_seconds
         return self.uptime_seconds
 
-
+'''
 test_obj = Uptime('twb-sf-881 uptime is 6 weeks, 4 days, 2 hours, 25 minutes')
 test_obj.years()
 test_obj.weeks()
@@ -127,6 +127,7 @@ test_obj.days()
 test_obj.minutes()
 x=test_obj.uptime_seconds()
 print x
+'''
 
 def test():
     uptime_strings = [
@@ -150,8 +151,22 @@ if __name__=='__main__':
 
 class IPAddressWithNetmask(IPAddress):
 
-    def __init__(self):
-        (ip_add,net_mask)=IPAddress.split('/')
+    def __init__(self,ip_add):
+        (ip_add,net_mask)=ip_add.split('/')
+        self.net_mask=int(net_mask)
         IPAddress.__init__(self,ip_add)
 
-    
+    def net_mask_bin(self):
+        return bin(int(('1'*self.net_mask)+'0'*(32-self.net_mask),2))
+
+
+    def net_mask_in_dotdecimal(self):
+        mask=self.net_mask_bin().split('0b')[1]
+        return '.'.join([str(int(mask[x:x+8],2)) for x in range(0,32,8)])
+
+
+testip=IPAddressWithNetmask('10.1.1.1/24')
+
+print testip.ip_add_d
+print testip.net_mask
+print testip.net_mask_in_dotdecimal()
